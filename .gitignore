@@ -1,2 +1,23 @@
+# Python
 __pycache__/
 *.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Engine benchmark and profiling output (regenerate on demand)
+results.txt
+src/chess_tests/benchmark.csv
+src/chess_tests/engine_profile.csv
+
+# Chess engine debug dumps
+src/chess/debug_data/
+
+# Runtime-written local state
+src/chess/settings.json
+src/pacman/leaderboard.json
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store

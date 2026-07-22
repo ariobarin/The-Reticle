@@ -1,10 +1,12 @@
-# ArcadeFSE
+# The Reticle
 
 A self-contained Python arcade that bundles three classic games into a single launcher: Chess, Pac-Man, and Connect Four. Built with pygame as a solo project to practice game architecture, real-time rendering, and writing competitive game-playing AI from scratch.
 
+![The Reticle main menu](docs/screenshot.png)
+
 ## What it is and why
 
-ArcadeFSE is a desktop arcade collection. One launcher opens a main menu, and from there you pick a game. The point of the project was to go beyond following a tutorial: each game ships its own engine, its own menus, and its own game modes, with shared infrastructure (rendering, input, persistence) layered underneath. The Chess engine in particular is the centerpiece, featuring a real evaluation function, search, and an opening book rather than a rules-only implementation.
+The Reticle is a desktop arcade collection. One launcher opens a main menu, and from there you pick a game. The point of the project was to go beyond following a tutorial: each game ships its own engine, its own menus, and its own game modes, with shared infrastructure (rendering, input, persistence) layered underneath. The Chess engine in particular is the centerpiece, featuring a real evaluation function, search, and an opening book rather than a rules-only implementation.
 
 ## Features by game
 
@@ -59,3 +61,6 @@ Each game returns to the main menu when you exit, so you can move between them w
 
 ## Status
 Personal project, actively tinkered with. The engines are functional and the arcade is playable end to end. There is no release packaging; run from source.
+
+## License
+Licensed under the [MIT License](LICENSE).
