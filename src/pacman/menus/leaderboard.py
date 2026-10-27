@@ -1,3 +1,4 @@
+import asyncio
 import pygame
 import json
 from utils import Button, write_centered_text
@@ -37,8 +38,11 @@ class Leaderboard:
         )
 
     def load_leaderboard(self):
-        with open('src\pacman\leaderboard.json', 'r') as f:
-            self.leaderboard = json.load(f)
+        try:
+            with open('src/pacman/leaderboard.json', 'r') as f:
+                self.leaderboard = json.load(f)
+        except FileNotFoundError:
+            self.leaderboard = {}
 
     def create_ordered_leaderboard(self):
         # name: (time, score)
@@ -96,7 +100,7 @@ class Leaderboard:
             y += entry_size
 
     def load_background(self):
-        background_path = "assets\LeaderboardBackground.png"
+        background_path = "assets/LeaderboardBackground.jpg"
 
         self.background = pygame.image.load(background_path)
 
@@ -115,7 +119,7 @@ class Leaderboard:
 
         self.screen.blit(self.background, (x, y))
 
-    def main_loop(self):
+    async def main_loop(self):
         running = True
 
         while running:
@@ -147,5 +151,6 @@ class Leaderboard:
                 return action
 
             pygame.display.flip()
+            await asyncio.sleep(0)
 
         return 'exit'

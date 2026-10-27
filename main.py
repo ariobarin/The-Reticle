@@ -1,3 +1,4 @@
+import asyncio
 import pygame
 from src.chess.chess import ChessGame
 from src.pacman.pacman import PacmanGame
@@ -11,7 +12,7 @@ class Arcade:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.menu = menu
 
-    def run(self):
+    async def run(self):
         running = True
         while running:
             match self.menu:
@@ -26,7 +27,7 @@ class Arcade:
                 case "exit":
                     pygame.quit()
                     return
-            self.menu = game.main_loop()
+            self.menu = await game.main_loop()
 
 # run the game
 if __name__ == "__main__":
@@ -34,4 +35,4 @@ if __name__ == "__main__":
     menu = "main menu"
 
     arcade = Arcade(menu)
-    arcade.run()
+    asyncio.run(arcade.run())

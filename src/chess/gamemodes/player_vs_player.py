@@ -1,8 +1,8 @@
+import asyncio
 from src.chess.board import Board, Piece
-from tkinter import simpledialog
+from webcompat import IS_WEB, ask_string
 from constants import *
 from time import time
-import tkinter as tk
 from utils import *
 import pygame
 import json
@@ -132,8 +132,6 @@ class PlayerVsPlayer:
 
         self.clock = pygame.time.Clock()
 
-        self.root = tk.Tk()
-        self.root.withdraw()
 
         self.sfx['game_start'].play()
 
@@ -202,13 +200,13 @@ class PlayerVsPlayer:
 
         file_path = 'src/chess/assets/sfx/'
         sfx = {
-            'move': pygame.mixer.Sound(f'{file_path}move.mp3'),
-            'capture': pygame.mixer.Sound(f'{file_path}capture.mp3'),
-            'castle': pygame.mixer.Sound(f'{file_path}castle.mp3'),
-            'check': pygame.mixer.Sound(f'{file_path}check.mp3'),
-            'game_over': pygame.mixer.Sound(f'{file_path}game_over.mp3'),
-            'game_start': pygame.mixer.Sound(f'{file_path}game_start.mp3'),
-            'promotion': pygame.mixer.Sound(f'{file_path}promotion.mp3')
+            'move': pygame.mixer.Sound(f'{file_path}move.ogg'),
+            'capture': pygame.mixer.Sound(f'{file_path}capture.ogg'),
+            'castle': pygame.mixer.Sound(f'{file_path}castle.ogg'),
+            'check': pygame.mixer.Sound(f'{file_path}check.ogg'),
+            'game_over': pygame.mixer.Sound(f'{file_path}game_over.ogg'),
+            'game_start': pygame.mixer.Sound(f'{file_path}game_start.ogg'),
+            'promotion': pygame.mixer.Sound(f'{file_path}promotion.ogg')
         }
 
         volume = settings['volume']/100
@@ -328,7 +326,7 @@ class PlayerVsPlayer:
             y -= CHESS_GRID_SIZE//2
             self.screen.blit(piece_image, (x, y))
 
-    def promotion_popup(self):
+    async def promotion_popup(self):
         '''
         Display a promotion popup
         '''
@@ -391,8 +389,9 @@ class PlayerVsPlayer:
                 self.screen.blit(piece_image, promotion_choices[choice]['rect'].topleft)
 
             pygame.display.flip()
+            await asyncio.sleep(0)
 
-    def draw_game_over(self):
+    async def draw_game_over(self):
         '''Draw the game over screen'''
         full_game_over_rect = pygame.Rect(CHESS_GRID_SIZE*2+BOARD_OFFSET_X, CHESS_GRID_SIZE*3+BOARD_OFFSET_Y, CHESS_GRID_SIZE*4, CHESS_GRID_SIZE*2)
 
@@ -438,6 +437,7 @@ class PlayerVsPlayer:
         pygame.draw.rect(self.screen, border_color, full_game_over_rect, border_width)
 
         pygame.display.flip()
+        await asyncio.sleep(0)
 
         # save the game to a json file
         # self.export_move_list()
@@ -452,8 +452,9 @@ class PlayerVsPlayer:
                         return 'chess main menu'
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     return 'chess main menu'
+            await asyncio.sleep(0)
                 
-    def handle_move(self):
+    async def handle_move(self):
         '''Handle the move of a piece'''
         # if the left mouse button is up or down and the mouse is on the board
         if (self.left_mouse_up or self.left_mouse_down) and pixel_on_board(self.mx, self.my):
@@ -482,7 +483,7 @@ class PlayerVsPlayer:
 
                 # if the move is a promotion, show a popup to choose the promotion piece
                 else:
-                    chosen_promotion_piece = self.promotion_popup()
+                    chosen_promotion_piece = await self.promotion_popup()
                     move = (start, end, start_piece, captured_piece, chosen_promotion_piece, castling, en_passant)
                     self.sfx['promotion'].play()
 
@@ -599,6 +600,8 @@ class PlayerVsPlayer:
 
     def export_move_list(self):
         '''Export the move list to a json file'''
+        if IS_WEB:
+            return
 
         # create a folder to store the move lists if it does not exist
         file_name = f'src/chess/debug_data/move_lists/{len(self.move_list)}_ID{self.board.hash_board()}.json'
@@ -667,7 +670,7 @@ class PlayerVsPlayer:
 
         current_fen = self.board.create_fen()
         # make a popup window that gets the user to set the FEN of the board
-        fen = simpledialog.askstring("Input", "Please enter the FEN:", parent=self.root, initialvalue=current_fen)
+        fen = ask_string("Input", "Please enter the FEN:", current_fen)
 
         if fen is None:
             return
@@ -738,7 +741,7 @@ class PlayerVsPlayer:
         if self.chess_clock.white_time <= 0 or self.chess_clock.black_time <= 0:
             return True
 
-    def main_loop(self):
+    async def main_loop(self):
         running = True
 
         self.lmx, self.lmy = pygame.mouse.get_pos()
@@ -758,7 +761,7 @@ class PlayerVsPlayer:
 
             # handle the events
             self.handle_annotations()
-            self.handle_move()
+            await self.handle_move()
             self.handle_piece_selection()
 
             self.draw_game()
@@ -774,7 +777,7 @@ class PlayerVsPlayer:
             # if the game is over, draw the game over screen
             if self.is_game_over():
                 self.sfx['game_over'].play()
-                return self.draw_game_over()
+                return await self.draw_game_over()
 
             if self.mb[0]:
                 self.draw_selected_piece()
@@ -784,3 +787,5 @@ class PlayerVsPlayer:
             self.clock.tick(FPS)
             
             pygame.display.flip()
+            await asyncio.sleep(0)
+

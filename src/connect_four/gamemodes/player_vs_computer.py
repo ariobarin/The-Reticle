@@ -1,4 +1,5 @@
-import threading
+import asyncio
+from webcompat import EngineSearch
 from src.connect_four.board import Board
 from src.connect_four.engine import Engine
 import pygame
@@ -12,7 +13,7 @@ STOP_BOUNCING_THRESHOLD = 5
 FPS = 60
 
 pygame.mixer.init()
-drop_sound = pygame.mixer.Sound('src\connect_four\\assets\coin_drop.mp3')
+drop_sound = pygame.mixer.Sound('src/connect_four/assets/coin_drop.ogg')
 
 back_button = {
     'text': 'Back',
@@ -144,7 +145,7 @@ class PlayerVsComputer:
                 # update the board
                 self.engine.update_board(self.board)
                 self.result_container = []
-                threading.Thread(target=self.engine.iterative_deepening, args=(self.result_container,)).start()
+                self.engine_search = EngineSearch(self.engine.iterative_deepening(self.result_container))
 
                 # drop the piece
                 x = CONNECT_FOUR_X_OFFSET + col * CONNECT_FOUR_GRID_SIZE + CONNECT_FOUR_GRID_SIZE // 2
@@ -199,7 +200,7 @@ class PlayerVsComputer:
             if event.type == pygame.MOUSEBUTTONUP:
                 self.L_mouse_up = True
 
-    def main_loop(self):
+    async def main_loop(self):
         running = True
 
         while running:
@@ -208,6 +209,7 @@ class PlayerVsComputer:
                 return menu_change
 
             if not self.human_turn:
+                self.engine_search.step()
                 self.request_engine_move()
 
             # draw
@@ -248,9 +250,11 @@ class PlayerVsComputer:
 
                         
                     pygame.display.flip()
+                    await asyncio.sleep(0)
                     pygame.time.Clock().tick(FPS)
 
             pygame.display.flip()
+            await asyncio.sleep(0)
             pygame.time.Clock().tick(FPS)
 
         return 'connect four main menu'

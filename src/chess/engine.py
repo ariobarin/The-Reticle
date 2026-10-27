@@ -9,7 +9,7 @@ HISTORY_SCORE = 2500
 VICTIM_SCORE_MULTIPLIER = 3
 
 
-OPENINGS_FILE = "src\chess\condensed_openings.json"
+OPENINGS_FILE = "src/chess/condensed_openings.json"
 
 def calculate_phase(board):
     phase = 0
@@ -435,6 +435,7 @@ class Engine:
                 break
             print(f"Depth: {depth}, Best move: {best_move}, Best eval: {best_eval}")
             result_container.append((best_move, best_eval, False))
+            yield
             depth += 1
             if best_eval == POSITIVE_INFINITY or best_eval == NEGATIVE_INFINITY:
                 break

@@ -49,19 +49,19 @@ class Ghost:
 
         for direction in ['up', 'down', 'right']:
             for i in range(2):
-                image = pygame.image.load(f'src\pacman\\assets\{self.ghost_type}\{direction}{i}.png')
+                image = pygame.image.load(f'src/pacman/assets/{self.ghost_type}/{direction}{i}.png')
                 image = pygame.transform.scale(image, (PACMAN_GRID_SIZE, PACMAN_GRID_SIZE))
                 self.animations[direction].append(image)
         
         for fear_type in ['feared', 'semi_feared']:
             for i in range(2):
-                image = pygame.image.load(f'src\pacman\\assets\\feared\{fear_type}{i}.png')
+                image = pygame.image.load(f'src/pacman/assets/feared/{fear_type}{i}.png')
                 image = pygame.transform.scale(image, (PACMAN_GRID_SIZE, PACMAN_GRID_SIZE))
                 self.animations[fear_type].append(image)
 
         # left animation is the same as the right animation (just flipped horizontally)
         for i in range(2):
-            image = pygame.image.load(f'src\pacman\\assets\{self.ghost_type}\\right{i}.png')
+            image = pygame.image.load(f'src/pacman/assets/{self.ghost_type}/right{i}.png')
             image = pygame.transform.scale(image, (PACMAN_GRID_SIZE, PACMAN_GRID_SIZE))
             image = pygame.transform.flip(image, True, False)
             self.animations['left'].append(image)

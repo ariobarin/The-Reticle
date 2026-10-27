@@ -1,5 +1,5 @@
+import math
 import pygame
-import numpy as np
 import pygame.font as pygame_font
 
 pygame_font.init()
@@ -73,7 +73,7 @@ def draw_arrow(screen, start, end, tail_start_offset, tail_width, head_width, he
 
     # vector from start to end
     dx, dy = end[0] - start[0], end[1] - start[1]
-    length = np.hypot(dx, dy)
+    length = math.hypot(dx, dy)
     if length == 0:
         return  # Cannot draw an arrow if length is 0
 

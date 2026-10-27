@@ -52,6 +52,19 @@ src/
 
 Each game returns to the main menu when you exit, so you can move between them without relaunching.
 
+## Play in the browser
+The same code runs in a browser through [pygbag](https://github.com/pygame-web/pygbag), which compiles nothing itself: it packs the game and loads it into CPython and pygame-ce built for WebAssembly.
+
+1. Install pygbag: `uv tool install pygbag==0.9.3` (or `pip install pygbag==0.9.3`).
+2. From this folder, so pygbag finds `pygbag.ini`: `pygbag --build --ume_block 0 .`
+3. The page is in `build/web/`. Serve that folder over HTTP to try it (`pygbag .` builds and serves it at http://localhost:8000).
+
+What changes in the browser (`webcompat.py`, keyed on `sys.platform == "emscripten"`):
+- Every screen's loop is `async` and yields once per frame, because the browser has to get control back to draw.
+- The chess and Connect Four engines still think in a thread on the desktop. The browser has no threads, so there they search one depth per frame and get at most 2 seconds per move.
+- Text prompts (Pac-Man name, chess FEN) use tkinter on the desktop and the browser's prompt box on the web.
+- The Pac-Man leaderboard starts empty in the browser and lasts until the page is reloaded.
+
 ## Notes
 - Some games write local state (for example the Pac-Man leaderboard and chess settings under `src/`). These JSON files are expected to be writable next to the source.
 - The Connect Four benchmark writes results to `results.txt`. The repo ships with a sample `results.txt` from prior runs.

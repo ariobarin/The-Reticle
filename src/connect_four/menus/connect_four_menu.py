@@ -1,3 +1,4 @@
+import asyncio
 import pygame
 from utils import Button
 
@@ -59,7 +60,7 @@ class ConnectFourMenu:
             self.buttons.append(button)
 
     def load_background(self):
-        background_path = "assets\ConnectFourBackground.png"
+        background_path = "assets/ConnectFourBackground.jpg"
 
         self.background = pygame.image.load(background_path)
 
@@ -78,7 +79,7 @@ class ConnectFourMenu:
 
         self.screen.blit(self.background, (x, y))
 
-    def main_loop(self):
+    async def main_loop(self):
         running = True
 
         while running:
@@ -107,5 +108,6 @@ class ConnectFourMenu:
                     return action
 
             pygame.display.flip()
+            await asyncio.sleep(0)
 
         return 'exit'

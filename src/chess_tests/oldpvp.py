@@ -94,13 +94,13 @@ class PlayerVsPlayer:
 
         file_path = 'src/chess/assets/sfx/'
         sfx = {
-            'move': pygame.mixer.Sound(f'{file_path}move.mp3'),
-            'capture': pygame.mixer.Sound(f'{file_path}capture.mp3'),
-            'castle': pygame.mixer.Sound(f'{file_path}castle.mp3'),
-            'check': pygame.mixer.Sound(f'{file_path}check.mp3'),
-            'game_over': pygame.mixer.Sound(f'{file_path}game_over.mp3'),
-            'game_start': pygame.mixer.Sound(f'{file_path}game_start.mp3'),
-            'promotion': pygame.mixer.Sound(f'{file_path}promotion.mp3')
+            'move': pygame.mixer.Sound(f'{file_path}move.ogg'),
+            'capture': pygame.mixer.Sound(f'{file_path}capture.ogg'),
+            'castle': pygame.mixer.Sound(f'{file_path}castle.ogg'),
+            'check': pygame.mixer.Sound(f'{file_path}check.ogg'),
+            'game_over': pygame.mixer.Sound(f'{file_path}game_over.ogg'),
+            'game_start': pygame.mixer.Sound(f'{file_path}game_start.ogg'),
+            'promotion': pygame.mixer.Sound(f'{file_path}promotion.ogg')
         }
 
         volume = settings['volume']/100

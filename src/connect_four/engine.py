@@ -1,6 +1,5 @@
 from src.connect_four.board import Board
 # from board import Board
-from concurrent.futures import ThreadPoolExecutor
 
 from collections import OrderedDict
 import time
@@ -218,6 +217,7 @@ class Engine:
                 break
 
             result_container.append((best_move, False))
+            yield
             print(f"Depth {depth} finished in {time.time() - start_time:.2f} seconds | Best move: {best_move} | Score: {score} | Evaluations: {self.num_evaluations}")
             depth += 1
 
@@ -247,8 +247,7 @@ if __name__ == "__main__":
         else:
 
             result_container = []
-            engine.iterative_deepening(result_container)
-            while result_container[-1][1] == False:
+            for _ in engine.iterative_deepening(result_container):
                 pass
             move = result_container[-1][0]
             print(f"Player 2 plays {move}")

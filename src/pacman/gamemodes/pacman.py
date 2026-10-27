@@ -1,8 +1,8 @@
+import asyncio
 import datetime
 import pygame
 import json
-from tkinter import simpledialog
-import tkinter as tk
+from webcompat import ask_string
 from src.pacman.ghost import Ghost
 from src.pacman.map import PacmanMap
 from src.pacman.player import PacmanPlayer
@@ -15,10 +15,6 @@ class Pacman:
     def __init__(self, screen):
         self.screen = screen
         self.clock = pygame.time.Clock()
-
-        # hide the root window
-        self.root = tk.Tk()
-        self.root.withdraw()
 
         # load map
         self.map = PacmanMap(screen)
@@ -40,11 +36,12 @@ class Pacman:
 
         self.load_sfx()
 
-        self.start_animation()
-
     def load_highscore(self):
-        with open('src\pacman\leaderboard.json', 'r') as f:
-            leaderboard = json.load(f)
+        try:
+            with open('src/pacman/leaderboard.json', 'r') as f:
+                leaderboard = json.load(f)
+        except FileNotFoundError:
+            leaderboard = {}
 
         highscore = 0
         for user in leaderboard:
@@ -55,7 +52,7 @@ class Pacman:
 
     def load_images(self):
         self.images = {}
-        life = pygame.image.load('src\pacman\\assets\misc\life.png')
+        life = pygame.image.load('src/pacman/assets/misc/life.png')
         # scale to be 50x50
         life = pygame.transform.scale(life, (50, 50))
         self.images['life'] = life
@@ -64,18 +61,18 @@ class Pacman:
         pygame.mixer.init()
 
         self.sfx = {}
-        self.sfx['eat'] = pygame.mixer.Sound('src\pacman\\assets\sfx\chomp.mp3')
-        self.sfx['eat_ghost'] = pygame.mixer.Sound('src\pacman\\assets\sfx\eating_ghost.mp3')
-        self.sfx['death'] = pygame.mixer.Sound('src\pacman\\assets\sfx\death.mp3')
-        self.sfx['retreat'] = pygame.mixer.Sound('src\pacman\\assets\sfx\\retreating.mp3')
-        self.sfx['siren'] = pygame.mixer.Sound('src\pacman\\assets\sfx\siren.mp3')
-        self.sfx['start'] = pygame.mixer.Sound('src\pacman\\assets\sfx\start.mp3')
+        self.sfx['eat'] = pygame.mixer.Sound('src/pacman/assets/sfx/chomp.ogg')
+        self.sfx['eat_ghost'] = pygame.mixer.Sound('src/pacman/assets/sfx/eating_ghost.ogg')
+        self.sfx['death'] = pygame.mixer.Sound('src/pacman/assets/sfx/death.ogg')
+        self.sfx['retreat'] = pygame.mixer.Sound('src/pacman/assets/sfx/retreating.ogg')
+        self.sfx['siren'] = pygame.mixer.Sound('src/pacman/assets/sfx/siren.ogg')
+        self.sfx['start'] = pygame.mixer.Sound('src/pacman/assets/sfx/start.ogg')
 
         # set volume
         for sound in self.sfx:
             self.sfx[sound].set_volume(0.1)
 
-    def start_animation(self):
+    async def start_animation(self):
         # reset background
         self.screen.fill((0, 0, 0))
 
@@ -90,9 +87,10 @@ class Pacman:
             tick -= 1
 
             pygame.display.flip()
+            await asyncio.sleep(0)
             self.clock.tick(60)
 
-    def dying_animation(self):
+    async def dying_animation(self):
         # play death sound
         self.sfx['death'].play()
         self.lives -= 1
@@ -111,6 +109,7 @@ class Pacman:
             self.player.draw_death(frame)
 
             pygame.display.flip()
+            await asyncio.sleep(0)
             self.clock.tick(60)
 
         # clear ghosts
@@ -118,13 +117,13 @@ class Pacman:
             ghost.reset() 
 
         if self.lives == 0:
-            self.draw_game_over()
+            await self.draw_game_over()
             return 'game over'
         else:
             self.player.reset()
             return 'continue'
 
-    def draw_game_over(self):
+    async def draw_game_over(self):
         tick = 60
         while tick > 0:
             tick -= 1
@@ -136,9 +135,10 @@ class Pacman:
             write_centered_text(self.screen, game_over_text, game_over_rect, game_over_color)
 
             pygame.display.flip()
+            await asyncio.sleep(0)
             self.clock.tick(60)
 
-    def eat_ghost(self, ghost):
+    async def eat_ghost(self, ghost):
         # play sound effect
         self.sfx['eat_ghost'].play()
 
@@ -169,20 +169,21 @@ class Pacman:
             write_centered_text(self.screen, score_text, score_rect, (255, 255, 255))
 
             pygame.display.flip()
+            await asyncio.sleep(0)
             self.clock.tick(60)
         
-    def handle_ghost_collision(self):
+    async def handle_ghost_collision(self):
         for ghost in self.ghosts:
             if self.player.rect.colliderect(ghost.rect):
                 if ghost.fear_timer > 0:
-                    self.eat_ghost(ghost)
+                    await self.eat_ghost(ghost)
                 else:
-                    return self.dying_animation()
+                    return await self.dying_animation()
                 
         return 'continue'
 
-    def add_leaderboard_entry(self):
-        user = simpledialog.askstring('Leaderboard', 'Enter your name:')
+    async def add_leaderboard_entry(self):
+        user = ask_string('Leaderboard', 'Enter your name:')
         if user is None:
             return
         
@@ -192,8 +193,11 @@ class Pacman:
         score = self.player.score
 
 
-        with open('src\pacman\leaderboard.json', 'r') as f:
-            leaderboard = json.load(f)
+        try:
+            with open('src/pacman/leaderboard.json', 'r') as f:
+                leaderboard = json.load(f)
+        except FileNotFoundError:
+            leaderboard = {}
 
         if user not in leaderboard:
             previous_best = 0
@@ -203,16 +207,16 @@ class Pacman:
 
         if score > previous_best:
             if score > self.highscore:
-                self.new_personal_best(highscore=True)
+                await self.new_personal_best(highscore=True)
             else:
-                self.new_personal_best()
+                await self.new_personal_best()
 
         leaderboard[user].append((current_time, score))
         
-        with open('src\pacman\leaderboard.json', 'w') as f:
+        with open('src/pacman/leaderboard.json', 'w') as f:
             json.dump(leaderboard, f)
         
-    def new_personal_best(self, highscore=False):
+    async def new_personal_best(self, highscore=False):
         # write new highscore
         tick = 60
         while tick > 0:
@@ -238,9 +242,10 @@ class Pacman:
             write_centered_text(self.screen, text, rect, color)
 
             pygame.display.flip()
+            await asyncio.sleep(0)
             self.clock.tick(60)
 
-    def new_level(self):
+    async def new_level(self):
         self.level += 1
 
         # play start sound
@@ -264,6 +269,7 @@ class Pacman:
             self.draw_game()
 
             pygame.display.flip()
+            await asyncio.sleep(0)
             self.clock.tick(60)
 
     def draw_ui(self):
@@ -318,7 +324,9 @@ class Pacman:
         for ghost in self.ghosts:
             ghost.draw()
 
-    def main_loop(self):
+    async def main_loop(self):
+        await self.start_animation()
+
         running = True
         while running:
             # handle events
@@ -336,7 +344,7 @@ class Pacman:
             self.mx, self.my = pygame.mouse.get_pos()
 
             if self.map.is_level_complete():
-                self.new_level()
+                await self.new_level()
             
             self.map.draw()
             self.player.handle_keys(events)
@@ -355,9 +363,9 @@ class Pacman:
             self.player.powered_up = False
 
             # ghost collision
-            result = self.handle_ghost_collision()
+            result = await self.handle_ghost_collision()
             if result == 'game over':
-                self.add_leaderboard_entry()
+                await self.add_leaderboard_entry()
                 return 'pacman main menu'
             elif result == 'continue':
                 pass
@@ -369,4 +377,5 @@ class Pacman:
             pygame.display.set_caption(f'Pacman | FPS: {int(self.clock.get_fps())}')
             self.clock.tick(cur_fps)
             pygame.display.flip()
+            await asyncio.sleep(0)
         return 'exit'

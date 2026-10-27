@@ -1,3 +1,4 @@
+import asyncio
 import pygame
 from utils import Button
 
@@ -71,7 +72,7 @@ class ChessMainMenu:
             self.buttons.append(button)
 
     def load_background(self):
-        background_path = "assets\ChessBackground.png"
+        background_path = "assets/ChessBackground.jpg"
 
         self.background = pygame.image.load(background_path)
 
@@ -90,7 +91,7 @@ class ChessMainMenu:
 
         self.screen.blit(self.background, (x, y))
 
-    def main_loop(self):
+    async def main_loop(self):
         running = True
 
         while running:
@@ -119,5 +120,6 @@ class ChessMainMenu:
                     return action
 
             pygame.display.flip()
+            await asyncio.sleep(0)
 
         return 'exit'

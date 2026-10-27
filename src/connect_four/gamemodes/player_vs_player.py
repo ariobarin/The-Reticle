@@ -1,3 +1,4 @@
+import asyncio
 from src.connect_four.board import Board
 import pygame
 from constants import BOARD_COLOR, TRANSPARENT_COLOR, CONNECT_FOUR_GRID_SIZE, CONNECT_FOUR_RADIUS, CONNECT_FOUR_X_OFFSET, CONNECT_FOUR_Y_OFFSET
@@ -10,7 +11,7 @@ STOP_BOUNCING_THRESHOLD = 5
 FPS = 60
 
 pygame.mixer.init()
-drop_sound = pygame.mixer.Sound('src\connect_four\\assets\coin_drop.mp3')
+drop_sound = pygame.mixer.Sound('src/connect_four/assets/coin_drop.ogg')
 
 back_button = {
     'text': 'Back',
@@ -176,7 +177,7 @@ class PlayerVsPlayer:
                 col = (event.pos[0] - CONNECT_FOUR_X_OFFSET) // CONNECT_FOUR_GRID_SIZE
                 self.drop_piece(col)
 
-    def main_loop(self):
+    async def main_loop(self):
         running = True
 
         while running:
@@ -222,9 +223,11 @@ class PlayerVsPlayer:
 
                         
                     pygame.display.flip()
+                    await asyncio.sleep(0)
                     pygame.time.Clock().tick(FPS)
 
             pygame.display.flip()
+            await asyncio.sleep(0)
             pygame.time.Clock().tick(FPS)
 
         return 'connect four main menu'

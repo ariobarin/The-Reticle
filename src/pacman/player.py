@@ -34,7 +34,7 @@ class PacmanPlayer:
 
         for i in range(3):
             # load the images
-            image = pygame.image.load(f'src\pacman\\assets\pacman\pacman{i}.png')
+            image = pygame.image.load(f'src/pacman/assets/pacman/pacman{i}.png')
 
             # scale the image
             image = pygame.transform.scale(image, (PACMAN_GRID_SIZE, PACMAN_GRID_SIZE))

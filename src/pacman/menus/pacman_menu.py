@@ -1,3 +1,4 @@
+import asyncio
 import pygame
 from utils import Button
 
@@ -60,7 +61,7 @@ class PacmanMenu:
             self.buttons.append(button)
 
     def load_background(self):
-        background_path = "assets\PacmanBackground.png"
+        background_path = "assets/PacmanBackground.jpg"
 
         self.background = pygame.image.load(background_path)
 
@@ -79,7 +80,7 @@ class PacmanMenu:
 
         self.screen.blit(self.background, (x, y))
 
-    def main_loop(self):
+    async def main_loop(self):
         running = True
 
         while running:
@@ -108,5 +109,6 @@ class PacmanMenu:
                     return action
                     
             pygame.display.flip()
+            await asyncio.sleep(0)
 
         return 'exit'

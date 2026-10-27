@@ -1,3 +1,4 @@
+import asyncio
 import json
 import pygame
 from utils import Slider, Button
@@ -81,7 +82,7 @@ class ChessSettingsMenu:
 
     def init_sliders(self):
         # read settings.json
-        with open('src\chess\settings.json', 'r') as file:
+        with open('src/chess/settings.json', 'r') as file:
             settings = json.load(file)
 
         self.sliders_data = {
@@ -211,7 +212,7 @@ class ChessSettingsMenu:
             'human_player': True # TODO: add a setting for this
         }
 
-        with open('src\chess\settings.json', 'w') as file:
+        with open('src/chess/settings.json', 'w') as file:
             json.dump(settings, file)
 
     def draw_square_color_preview(self):
@@ -237,7 +238,7 @@ class ChessSettingsMenu:
         pygame.draw.rect(self.screen, (0, 0, 0), light_square_preview_rect, 5)
         
 
-    def main_loop(self):
+    async def main_loop(self):
         running = True
 
         self.lmx, self.lmy = pygame.mouse.get_pos()
@@ -285,5 +286,6 @@ class ChessSettingsMenu:
                 return action
 
             pygame.display.flip()
+            await asyncio.sleep(0)
 
         return 'chess main menu'

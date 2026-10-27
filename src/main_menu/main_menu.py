@@ -1,3 +1,4 @@
+import asyncio
 import pygame
 
 from utils import write_centered_text, Button
@@ -64,7 +65,7 @@ class MainMenu:
             self.buttons.append(button)
 
     def load_background(self):
-        background_path = "assets\ArcadeBackground.png"
+        background_path = "assets/ArcadeBackground.jpg"
 
         self.background = pygame.image.load(background_path)
 
@@ -83,7 +84,7 @@ class MainMenu:
 
         self.screen.blit(self.background, (x, y))
 
-    def main_loop(self):
+    async def main_loop(self):
         running = True
         while running:
             L_mouse_up = False
@@ -111,5 +112,6 @@ class MainMenu:
                     return action
 
             pygame.display.flip()
+            await asyncio.sleep(0)
             self.clock.tick(FPS)
         return "exit"
