@@ -32,12 +32,18 @@ class TranspositionTable:
             self.table.popitem(last=False)
         self.table[key] = value
 
+class SearchTimeout(Exception):
+    pass
+
 # player 1 is the maximizing player
 # player 2 is the minimizing player
 class Engine:
     def __init__(self, board: Board, time_limit_ms=5000):
         self.board = board
         self.time_limit_ms = time_limit_ms
+        # stop in the middle of a depth when time runs out (the browser can't search in the background)
+        self.hard_time_limit = False
+        self.depth = 0
 
         self.history_table = {}
 
@@ -112,6 +118,10 @@ class Engine:
 
     def minimax(self, depth, alpha, beta):
         self.num_evaluations += 1
+        # never stop during depth 1, so there is always a move to play
+        if self.hard_time_limit and self.depth > 1 and self.num_evaluations % 512 == 0:
+            if time.time() - self.start_time > self.time_limit_ms / 1000:
+                raise SearchTimeout
 
         # TOFIX: interference
         # key = (self.board.hash_board(), depth)
@@ -199,7 +209,7 @@ class Engine:
 
         print(f"What engine sees:\n{self.board}")
 
-        start_time = time.time()
+        start_time = self.start_time = time.time()
 
         moves = self.get_ordered_moves()
         if len(moves) == 1:
@@ -212,7 +222,12 @@ class Engine:
             if depth > 40:
                 break
             
-            best_move, score = self.get_best_move(depth)
+            self.depth = depth
+            try:
+                depth_move, depth_score = self.get_best_move(depth)
+            except SearchTimeout: # keep the last finished depth's move
+                break
+            best_move, score = depth_move, depth_score
             if best_move == POSITIVE_INFINITY or best_move == NEGATIVE_INFINITY:
                 break
 
