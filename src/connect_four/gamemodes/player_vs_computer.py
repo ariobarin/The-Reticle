@@ -1,5 +1,5 @@
 import asyncio
-from webcompat import IS_WEB, EngineSearch
+from webcompat import IS_WEB, WEB_CONNECT_FOUR_TIME_LIMIT_MS, EngineSearch
 from src.connect_four.board import Board
 from src.connect_four.engine import Engine
 import pygame
@@ -73,7 +73,7 @@ class PlayerVsComputer:
     def __init__(self, screen):
         self.screen = screen
         self.board = Board()
-        self.engine = Engine(self.board, time_limit_ms=1500)
+        self.engine = Engine(self.board, time_limit_ms=WEB_CONNECT_FOUR_TIME_LIMIT_MS if IS_WEB else 1500)
         self.engine.hard_time_limit = IS_WEB
 
         self.pieces = []

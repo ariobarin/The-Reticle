@@ -5,8 +5,10 @@ import time
 
 IS_WEB = sys.platform == "emscripten"
 
-# the browser has no threads, so the engines think on the main loop and get less time per move
-WEB_ENGINE_TIME_LIMIT_MS = 2000
+# the browser has no threads, so the engines think on the main loop, sharing each frame with drawing
+# (see EngineSearch); these caps keep them about as strong as when they had the whole frame
+WEB_ENGINE_TIME_LIMIT_MS = 4000  # chess
+WEB_CONNECT_FOUR_TIME_LIMIT_MS = 3000
 
 if not IS_WEB:
     import tkinter as tk
@@ -27,8 +29,10 @@ def ask_string(title, prompt, initial_value=""):
     return answer
 
 
-# how long a frame in the browser lets the engine think before drawing (a frame is 16.7 ms)
-WEB_SEARCH_SLICE_SECONDS = 0.008
+# how long a frame in the browser lets the engine think before drawing: drawing a board takes about
+# 15 ms in the browser, so while an engine thinks each frame spans two screen refreshes (33 ms, 30 fps),
+# and this fills the rest of it
+WEB_SEARCH_SLICE_SECONDS = 0.015
 
 
 class EngineSearch:
