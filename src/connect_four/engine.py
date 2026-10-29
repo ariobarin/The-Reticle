@@ -43,6 +43,8 @@ class Engine:
         self.time_limit_ms = time_limit_ms
         # stop in the middle of a depth when time runs out (the browser can't search in the background)
         self.hard_time_limit = False
+        # in the browser the search hands the frame back when this time (perf_counter) passes; see EngineSearch
+        self.slice_end = None
         self.depth = 0
 
         self.history_table = {}
@@ -116,7 +118,11 @@ class Engine:
         
         return score
 
+    # minimax and get_best_move are generators so the browser can pause a search between frames: they
+    # yield when the frame's slice of time is up, and return their result
     def minimax(self, depth, alpha, beta):
+        if self.slice_end is not None and time.perf_counter() >= self.slice_end:
+            yield
         self.num_evaluations += 1
         # never stop during depth 1, so there is always a move to play
         if self.hard_time_limit and self.depth > 1 and self.num_evaluations % 512 == 0:
@@ -151,7 +157,7 @@ class Engine:
             best_score = NEGATIVE_INFINITY
             for move in self.get_ordered_moves():
                 self.board.drop_piece(move)
-                score = self.minimax(depth - 1, alpha, beta)
+                score = yield from self.minimax(depth - 1, alpha, beta)
                 self.board.undo_move()
                 best_score = max(best_score, score)
                 alpha = max(alpha, best_score)
@@ -162,7 +168,7 @@ class Engine:
             best_score = POSITIVE_INFINITY
             for move in self.get_ordered_moves():
                 self.board.drop_piece(move)
-                score = self.minimax(depth - 1, alpha, beta)
+                score = yield from self.minimax(depth - 1, alpha, beta)
                 self.board.undo_move()
                 best_score = min(best_score, score)
                 beta = min(beta, best_score)
@@ -182,7 +188,7 @@ class Engine:
             best_score = NEGATIVE_INFINITY
             for move in self.get_ordered_moves():
                 self.board.drop_piece(move)
-                score = self.minimax(depth - 1, alpha, beta)
+                score = yield from self.minimax(depth - 1, alpha, beta)
                 self.board.undo_move()
 
                 if score >= best_score:
@@ -193,7 +199,7 @@ class Engine:
             best_score = POSITIVE_INFINITY
             for move in self.get_ordered_moves():
                 self.board.drop_piece(move)
-                score = self.minimax(depth - 1, alpha, beta)
+                score = yield from self.minimax(depth - 1, alpha, beta)
                 self.board.undo_move()
 
                 if score <= best_score:
@@ -224,7 +230,7 @@ class Engine:
             
             self.depth = depth
             try:
-                depth_move, depth_score = self.get_best_move(depth)
+                depth_move, depth_score = yield from self.get_best_move(depth)
             except SearchTimeout: # keep the last finished depth's move
                 break
             best_move, score = depth_move, depth_score

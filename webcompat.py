@@ -1,6 +1,7 @@
 # helpers that let the arcade run on the desktop and in the browser (pygbag)
 import sys
 import threading
+import time
 
 IS_WEB = sys.platform == "emscripten"
 
@@ -26,11 +27,16 @@ def ask_string(title, prompt, initial_value=""):
     return answer
 
 
-class EngineSearch:
-    '''Run an engine search generator (one step per depth) in a thread, or one step per frame in the browser'''
+# how long a frame in the browser lets the engine think before drawing (a frame is 16.7 ms)
+WEB_SEARCH_SLICE_SECONDS = 0.008
 
-    def __init__(self, steps):
+
+class EngineSearch:
+    '''Run an engine search generator in a thread, or a slice of it each frame in the browser'''
+
+    def __init__(self, steps, engine=None):
         self.steps = steps
+        self.engine = engine
         if not IS_WEB:
             threading.Thread(target=self.run_to_end, daemon=True).start()
 
@@ -39,6 +45,8 @@ class EngineSearch:
             pass
 
     def step(self):
-        '''Search one more depth (only needed in the browser, where there is no thread doing it)'''
+        '''Think for one frame's slice (only needed in the browser, where there is no thread doing it)'''
         if IS_WEB:
+            if self.engine is not None:
+                self.engine.slice_end = time.perf_counter() + WEB_SEARCH_SLICE_SECONDS
             next(self.steps, None)

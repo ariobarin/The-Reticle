@@ -677,7 +677,7 @@ class PlayerVsComputer:
             self.engine.set_time_limit(min(self.engine.time_limit_ms, WEB_ENGINE_TIME_LIMIT_MS))
 
         self.engine_move_container = []
-        self.engine_search = EngineSearch(self.engine.iterative_deepening(self.engine_move_container))
+        self.engine_search = EngineSearch(self.engine.iterative_deepening(self.engine_move_container), self.engine)
 
     def draw_latest_engine_move(self):
         '''Draw the latest move of the engine'''

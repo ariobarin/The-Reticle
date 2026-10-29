@@ -146,7 +146,7 @@ class PlayerVsComputer:
                 # update the board
                 self.engine.update_board(self.board)
                 self.result_container = []
-                self.engine_search = EngineSearch(self.engine.iterative_deepening(self.result_container))
+                self.engine_search = EngineSearch(self.engine.iterative_deepening(self.result_container), self.engine)
 
                 # drop the piece
                 x = CONNECT_FOUR_X_OFFSET + col * CONNECT_FOUR_GRID_SIZE + CONNECT_FOUR_GRID_SIZE // 2

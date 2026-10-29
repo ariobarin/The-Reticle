@@ -161,6 +161,8 @@ class Engine:
         self.board = board.__copy__()
         self.depth = depth
         self.time_limit_ms = time_limit_ms
+        # in the browser the search hands the frame back when this time (perf_counter) passes; see EngineSearch
+        self.slice_end = None
 
         self.history_table = {}
         self.cached_generations = {}
@@ -332,9 +334,13 @@ class Engine:
 
         return beta
 
+    # minimax and find_best_move are generators so the browser can pause a search between frames:
+    # they yield when the frame's slice of time is up, and return their result
     def minimax(self, depth, alpha, beta):
         if self.time_exceeded():
             raise Exception("Time exceeded")
+        if self.slice_end is not None and time.perf_counter() >= self.slice_end:
+            yield
 
         if self.board.is_threefold_repetition():
             return 0
@@ -353,7 +359,7 @@ class Engine:
             max_eval = NEGATIVE_INFINITY
             for move in moves:
                 self.board.make_move(move)
-                eval = self.minimax(depth - 1, alpha, beta)
+                eval = yield from self.minimax(depth - 1, alpha, beta)
                 self.board.undo_move()
                 max_eval = max(max_eval, eval)
                 alpha = max(alpha, eval)
@@ -365,7 +371,7 @@ class Engine:
             min_eval = POSITIVE_INFINITY
             for move in moves:
                 self.board.make_move(move)
-                eval = self.minimax(depth - 1, alpha, beta)
+                eval = yield from self.minimax(depth - 1, alpha, beta)
                 self.board.undo_move()
                 min_eval = min(min_eval, eval)
                 beta = min(beta, eval)
@@ -384,7 +390,7 @@ class Engine:
 
         for move in moves:
             self.board.make_move(move)
-            eval = self.minimax(depth - 1, alpha, beta)
+            eval = yield from self.minimax(depth - 1, alpha, beta)
             self.board.undo_move()
 
             if self.board.white_to_move:
@@ -429,7 +435,7 @@ class Engine:
         depth = 1
         while not self.time_exceeded():
             try:
-                best_move, best_eval = self.find_best_move(depth)
+                best_move, best_eval = yield from self.find_best_move(depth)
             except Exception as e:
                 print(e)
                 break
